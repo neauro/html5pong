@@ -5,9 +5,6 @@ var game = ( function () {
         width = canvas.width,
         height = canvas.height,
         gLoop, // calls game loop
-        fps = 20,
-        slowfps = 10000000,
-        currentfps = 20,
         game_started = false,
         ctx = canvas.getContext("2d");
 
@@ -35,8 +32,8 @@ var game = ( function () {
             var that = this;    // new context for all functions
             // --attributes ---
             // TODO: make ball shoot off in a random direction at the beginning
-            that.X = 600;
-            that.Y = 400;
+            that.X = width/2;
+            that.Y = 30;
             that.radius = 12;
             that.horizontal_speed = 5;
             that.vertical_speed = 5;
@@ -52,7 +49,6 @@ var game = ( function () {
             // when ball hits paddle, go the other way
             that.bounce = function() {
                 that.horizontal_speed = -(that.horizontal_speed);
-                add_point(PLAYER_ONE);
             }
 
             // check for collision
@@ -77,12 +73,13 @@ var game = ( function () {
                 // ball movement
                 // check if ball has hit walls or paddle;
                 // if so, reverse direction
-                // PS. only change direction if a new/different collision occurred
                 var collision = that.collide();
-                if (collision != that.past_collision) {
+                if (collision != that.past_collision) { // only change direction if new/different collision occurred
                     if (collision == LEFT_WALL ||
-                        collision == RIGHT_WALL)
+                        collision == RIGHT_WALL) {
                         that.horizontal_speed = -(that.horizontal_speed);
+                        add_point(collision);
+                    }
                     if (collision == TOP_WALL ||
                         collision == BOTTOM_WALL)
                         that.vertical_speed = -(that.vertical_speed);
@@ -214,10 +211,11 @@ var game = ( function () {
 
     //------functions ---------------
     // add a point 
-    var add_point = function(player_that_scored) {
-        if (player_that_scored == PLAYER_ONE)
-            playerone_score++;
-        else playertwo_score++;
+    // based on what wall was hit
+    var add_point = function(wall) {
+        if (wall == LEFT_WALL)
+            playertwo_score++;
+        else playerone_score++;
     };
 
     // clear canvas
@@ -234,10 +232,6 @@ var game = ( function () {
     var gameloop = function() {
         clear();
 
-        ctx.fillStyle = "#a7938a";
-        ctx.font = "22pt Courier New";
-        ctx.fillText("pongu!", width / 2 - 70, 25);
-
         ctx.font = "Bold 52pt Courier New";
         ctx.fillStyle = "#b2cfb1";
         ctx.fillText(playerone_score, score_x, score_y);
@@ -246,24 +240,25 @@ var game = ( function () {
 
         player.draw();
         player2.draw();
-        ball.draw();
-        gLoop = setTimeout(gameloop, currentfps);
+        if (game_started) ball.draw();
+
+        // don't run game until player clicks
+        if (game_started) gLoop = setTimeout(gameloop, 20);
     };
 
     // player input: start game when player clicks on canvas
     canvas.onmousedown = function(e) {
-        if (currentfps == fps)
-            currentfps = slowfps;
-        else if (currentfps == slowfps)
-            currentfps = fps;
-        /*
         if (!game_started) {
             game_started = true;
             gameloop();
         }
-        */
     };
 
     gameloop();
+    ctx.font = "Bold 52pt Courier New";
+    ctx.fillStyle = "#b37278";
+    ctx.fillText("it's pong!", 150,100);
+    ctx.font = "Bold 20pt Courier New";
+    ctx.fillText("click anywhere to begin", 170,150);
 
 })();
