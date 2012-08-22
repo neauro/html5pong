@@ -51,6 +51,11 @@ var game = ( function () {
                 that.horizontal_speed = -(that.horizontal_speed);
             }
 
+            // starting "animation" for ball
+            that.start_ball = function() {
+                that.setPosition(width/2, ball.radius);
+            }
+
             // check for collision
             that.collide = function() {
                 var collided = NO_COLLISION;
@@ -216,6 +221,9 @@ var game = ( function () {
         if (wall == LEFT_WALL)
             playertwo_score++;
         else playerone_score++;
+
+        ball.start_ball();
+        game_started = false;
     };
 
     // clear canvas
