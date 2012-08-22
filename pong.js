@@ -20,7 +20,11 @@ var game = ( function () {
         RIGHT_WALL = 1,
         BOTTOM_WALL = 2,
         LEFT_WALL = 3,
-        PADDLE = BALL = 4;
+        BALL = 4;
+
+    var PLAYER_ONE = 1,
+        PLAYER_TWO = 2,
+        playerone_score = playertwo_score = 0;
         
 
 
@@ -48,6 +52,7 @@ var game = ( function () {
             // when ball hits paddle, go the other way
             that.bounce = function() {
                 that.horizontal_speed = -(that.horizontal_speed);
+                add_point(PLAYER_ONE);
             }
 
             // check for collision
@@ -64,16 +69,6 @@ var game = ( function () {
                 if ((that.Y+that.radius) <= 2*that.radius)
                     collided = TOP_WALL;
 
-                /*
-                var hit_paddle_side = beneath_paddle_top = above_paddle_bottom = false;
-                if (((that.X-that.radius) <= (player.X+player.width))) hit_paddle_side = true;
-                if ((that.Y >= player.Y)) beneath_paddle_top = true;
-                if ((that.Y < (player.Y+player.height))) above_paddle_bottom = true;
-
-                if (hit_paddle_side && beneath_paddle_top && above_paddle_bottom)
-                    collided = PADDLE;
-                */
-
                 return collided;
             }
             
@@ -86,8 +81,7 @@ var game = ( function () {
                 var collision = that.collide();
                 if (collision != that.past_collision) {
                     if (collision == LEFT_WALL ||
-                        collision == RIGHT_WALL ||
-                        collision == PADDLE)
+                        collision == RIGHT_WALL)
                         that.horizontal_speed = -(that.horizontal_speed);
                     if (collision == TOP_WALL ||
                         collision == BOTTOM_WALL)
@@ -150,6 +144,7 @@ var game = ( function () {
                 collided = BOTTOM_WALL;
 
             // check collision with ball
+            // TODO: make sure collision with bottom of the paddle works too
             var hit_paddle_side = beneath_paddle_top = above_paddle_bottom = false;
             if (that.player_number == 1 &&
                ((ball.X-ball.radius) <= (that.X+that.width))) hit_paddle_side = true;
@@ -206,7 +201,25 @@ var game = ( function () {
     }
 
 
+    //------setup     ---------------
+    // create players and check for key presses 
+    var score_x = 80, score_y = 490, offset = 490; // text positions
+    var player = new Player(1, 30, 150);
+    var player2 = new Player(2, 650, 150);
+    window.addEventListener("keydown", player.key_pressed);
+    window.addEventListener("keyup", player.key_released);
+    window.addEventListener("keydown", player2.key_pressed);
+    window.addEventListener("keyup", player2.key_released);
+
+
     //------functions ---------------
+    // add a point 
+    var add_point = function(player_that_scored) {
+        if (player_that_scored == PLAYER_ONE)
+            playerone_score++;
+        else playertwo_score++;
+    };
+
     // clear canvas
     var clear = function() {
         ctx.fillStyle = "#f0e0d0";
@@ -216,28 +229,20 @@ var game = ( function () {
         ctx.fill();
     };
 
-    // create players and check for key presses 
-    var player = new Player(1, 30, 150);
-    var player2 = new Player(2, 650, 150);
-    window.addEventListener("keydown", player.key_pressed);
-    window.addEventListener("keyup", player.key_released);
-    window.addEventListener("keydown", player2.key_pressed);
-    window.addEventListener("keyup", player2.key_released);
 
     // game loop
     var gameloop = function() {
         clear();
 
         ctx.fillStyle = "#a7938a";
-        ctx.font = "20pt Courier New";
-        ctx.fillText("pongu!", width / 2 - 168, 25);
-        /*
-        ctx.fillText("ball: " + ball.X + "," + ball.Y, 168, 100);
-        ctx.fillText("player: " + player.X + ",(" + player.Y + "," + (player.Y+player.height) + ")", 168, 150);
-        ctx.fillText("ball.Y >= player.Y: " + (ball.Y >= player.Y), 148, 170);
-        ctx.fillText("ball.Y >= player.Y: " + (ball.Y >= player.Y), 148, 190);
-        ctx.fillText("ball.Y < player.Y+player.height: " + (ball.Y < (player.Y+player.height)), 148, 210);
-        */
+        ctx.font = "22pt Courier New";
+        ctx.fillText("pongu!", width / 2 - 70, 25);
+
+        ctx.font = "Bold 52pt Courier New";
+        ctx.fillStyle = "#b2cfb1";
+        ctx.fillText(playerone_score, score_x, score_y);
+        ctx.fillStyle = "#a7938a";
+        ctx.fillText(playertwo_score, score_x+offset, score_y);
 
         player.draw();
         player2.draw();
